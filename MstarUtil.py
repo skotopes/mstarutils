@@ -3,7 +3,7 @@
 import coloredlogs 
 import logging
 import argparse
-
+import os
 
 class Main:
     def __init__(self):
@@ -182,8 +182,11 @@ class Main:
         self.logger.info("Writing bootloader")
 
         self.logger.info(f"Opening boot0 disk: {self.args.emmc}boot0")
-        disk = open("{self.args.emmc}boot0", "wb")
-        
+        sys_disk_forcero = "/sys/block/{}boot0/force_ro".format(self.args.emmc.replace("/dev/",""))
+        if os.system(f"echo 0 > {sys_disk_forcero}") != 0:
+            raise Exception("Unable to unlock boot0")
+        disk = open(f"{self.args.emmc}boot0", "wb")
+
         self.logger.info(f"Seeking mstarfile to {self.boot['source_address']}")
         self.mstar.seek(self.boot['source_address'])
 
@@ -191,7 +194,12 @@ class Main:
         bytes_left = self.boot['source_size']
         while bytes_left > 0:
             chunk_size = bytes_left if bytes_left > 1024 else 1024
-            disk.write(self.mstar.read(chunk_size))
+            chunk_data = self.mstar.read(chunk_size)
+            if len(chunk_data) != chunk_size:
+                raise Exception("Read source failed, read size != chunk size")
+            write_size = disk.write(chunk_data)
+            if write_size != chunk_size:
+                raise Exception("Write destination failed, write size != chunk size")
             bytes_left -= chunk_size
 
         self.logger.info("Closing boot disk")
@@ -222,7 +230,12 @@ class Main:
             bytes_left = write['source_size']
             while bytes_left > 0:
                 chunk_size = bytes_left if bytes_left > 1024 else 1024
-                disk.write(self.mstar.read(chunk_size))
+                chunk_data = self.mstar.read(chunk_size)
+                if len(chunk_data) != chunk_size:
+                    raise Exception("Read source failed, read size != chunk size")
+                write_size = disk.write(chunk_data)
+                if write_size != chunk_size:
+                    raise Exception("Write destination failed, write size != chunk size")
                 bytes_left -= chunk_size
 
             self.logger.info(f"Writing {write['destination_name']} complete")

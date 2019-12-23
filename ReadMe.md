@@ -23,7 +23,7 @@ That's it.
 
 # Usage
 
-In general code should be self-explanatory. But there is a small built in help, just run 
+In general code should be self-explanatory. But there is a small built-in help, just run
 
     ./MstarUtil.py -h
 
@@ -44,25 +44,28 @@ Important notice: your must have sdio host controller to access emmc boot partit
 
 # Raspberry Pi SDIO
 
+It is going to turn off pi's internal wifi, but totally worth it.
+
 Pinout: https://pinout.xyz/pinout/sdio
 
 Load device tree overlay for 4-bit wide bus:
 
     dtoverlay sdio
 
-Also keep in mind that you can access EMMC card with only 1 data line.
+Also we can access EMMC card with only 1 data line.
 Load device tree overlay for 1-bit wide bus:
 
     dtoverlay sdio bus_width=1
 
 
 After that command you'll see new devices:
-/dev/mmcblk2        # main storage
-/dev/mmcblk2boot0   # main boot partition
-/dev/mmcblk2boot1   # second boot partition, normally not used
-/dev/mmcblk2rpmb    # rpmb special device
 
-mmc-utils can provide detailed information for connected flash. 
+    /dev/mmcblk2        # main storage
+    /dev/mmcblk2boot0   # main boot partition
+    /dev/mmcblk2boot1   # second boot partition, normally not used
+    /dev/mmcblk2rpmb    # rpmb special device
+
+mmc-utils can provide detailed information for connected flash.
 
 
 # Wiring
